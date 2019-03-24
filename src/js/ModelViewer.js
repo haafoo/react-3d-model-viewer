@@ -14,21 +14,23 @@ class ModelViewer extends Component {
   }
 
   componentDidMount() {
-    const width = this.mount.clientWidth
-    const height = this.mount.clientHeight
+
+    //ADD RENDERER
+    this.renderer = new THREE.WebGLRenderer({
+      canvas: document.querySelector("canvas"),
+      // canvas: this.mount,
+      antialias: true
+    })
+    this.renderer.setClearColor(this.props.backgroundColor)
+    this.renderer.setSize(this.mount.clientWidth, this.mount.clientHeight)
 
     //ADD CAMERA
     this.camera = new THREE.PerspectiveCamera(
       35,
-      width / height,
+      this.mount.clientWidth / this.mount.clientHeight,
       0.1,
       10000
     )
-
-    //ADD RENDERER
-    this.renderer = new THREE.WebGLRenderer({ antialias: true })
-    this.renderer.setClearColor(this.props.backgroundColor)
-    this.renderer.setSize(width, height)
 
     // ADD LIGHTS
     this.scene.add(new THREE.AmbientLight(0x736F6E, 0.5))
@@ -74,7 +76,7 @@ class ModelViewer extends Component {
       },
       null,
       err => {
-        console.warn(`Unable to laod file ${this.props.url}:${err}`)
+        console.warn(`Unable to load file ${this.props.url}:${err}`)
         console.warn(err)
         // ADD CUBE
         this.mesh = new THREE.Mesh(
@@ -88,9 +90,11 @@ class ModelViewer extends Component {
         this.start()
       }
     )
+    window.addEventListener('resize', this.updateCanvasSize, false)
   }
 
   componentWillUnmount() {
+    window.removeEventListener('resize', this.updateCanvasSize, false)
     this.stop()
     this.mount.removeChild(this.renderer.domElement)
   }
@@ -105,14 +109,25 @@ class ModelViewer extends Component {
     cancelAnimationFrame(this.frameId)
   }
 
+  updateCanvasSize = () => {
+    const canvas = this.renderer.domElement
+    canvas.width = this.mount.clientWidth
+    canvas.height = this.mount.clientHeight
+    this.renderer.setSize(this.mount.clientWidth, this.mount.clientHeight)
+    this.camera.aspect = this.mount.clientWidth / this.mount.clientHeight
+    // this.camera.fov = Math.atan(window.innerHeight / 2 / camera.position.z) * 2 * THREE.Math.RAD2DEG
+    // this.camera.fov = Math.atan(this.mount.clientHeight / 2 / camera.position.z) * 2 * THREE.Math.RAD2DEG
+    this.camera.updateProjectionMatrix()
+  }
+
   animate = () => {
     this.frameId = window.requestAnimationFrame(this.animate)
     this.control.update()
-
     this.renderScene()
   }
 
   renderScene = () => {
+    // this.updateCanvasSize()
     if (this.props.rotate) {
       this.mesh.rotation.x += this.props.rotationSpeeds[0]
       this.mesh.rotation.y += this.props.rotationSpeeds[1]
@@ -124,12 +139,35 @@ class ModelViewer extends Component {
 
   render() {
     return(
+      <div style={{
+        position: 'relative',
+        width: this.props.width,
+        // maxWidth: this.props.maxWidth,
+        paddingBottom: this.props.aspectRatio
+      }}>
       <div
-        style={{ width: this.props.width, height: this.props.height }}
         ref={mount => {
           this.mount = mount
-          }}
-      />
+        }}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height:'100%' 
+        }}
+      >
+        <canvas
+        style={{
+          width: '100%',
+          height:'100%' 
+        }}
+          width={'100%'}
+          height={'100%'}
+        >
+        </canvas>
+      </div>
+      </div>
     )
   }
 }
@@ -138,8 +176,9 @@ ModelViewer.defaultProps = {
   // url: './Torus_knot_1.stl', // binary - https://commons.wikimedia.org/wiki/File:Torus_knot_1.stl
   // url: 'n2.stl', // ascii - http://pub.ist.ac.at/~edels/Tubes/
   url: './test_model.stl',
-  width: '400px',
-  height: '400px',
+  width: '100%',
+  // maxWidth: '42rem',
+  aspectRatio: '56.125%',
   color: '#FDD017',
   backgroundColor: '#EAEAEA',
   rotate: true,

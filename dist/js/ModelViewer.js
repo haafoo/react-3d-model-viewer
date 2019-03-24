@@ -59,6 +59,19 @@ function (_Component) {
       cancelAnimationFrame(_this.frameId);
     });
 
+    _defineProperty(_assertThisInitialized(_this), "updateCanvasSize", function () {
+      var canvas = _this.renderer.domElement;
+      canvas.width = _this.mount.clientWidth;
+      canvas.height = _this.mount.clientHeight;
+
+      _this.renderer.setSize(_this.mount.clientWidth, _this.mount.clientHeight);
+
+      _this.camera.aspect = _this.mount.clientWidth / _this.mount.clientHeight; // this.camera.fov = Math.atan(window.innerHeight / 2 / camera.position.z) * 2 * THREE.Math.RAD2DEG
+      // this.camera.fov = Math.atan(this.mount.clientHeight / 2 / camera.position.z) * 2 * THREE.Math.RAD2DEG
+
+      _this.camera.updateProjectionMatrix();
+    });
+
     _defineProperty(_assertThisInitialized(_this), "animate", function () {
       _this.frameId = window.requestAnimationFrame(_this.animate);
 
@@ -68,6 +81,7 @@ function (_Component) {
     });
 
     _defineProperty(_assertThisInitialized(_this), "renderScene", function () {
+      // this.updateCanvasSize()
       if (_this.props.rotate) {
         _this.mesh.rotation.x += _this.props.rotationSpeeds[0];
         _this.mesh.rotation.y += _this.props.rotationSpeeds[1];
@@ -88,16 +102,16 @@ function (_Component) {
     value: function componentDidMount() {
       var _this2 = this;
 
-      var width = this.mount.clientWidth;
-      var height = this.mount.clientHeight; //ADD CAMERA
-
-      this.camera = new THREE.PerspectiveCamera(35, width / height, 0.1, 10000); //ADD RENDERER
-
+      //ADD RENDERER
       this.renderer = new THREE.WebGLRenderer({
+        canvas: document.querySelector("canvas"),
+        // canvas: this.mount,
         antialias: true
       });
       this.renderer.setClearColor(this.props.backgroundColor);
-      this.renderer.setSize(width, height); // ADD LIGHTS
+      this.renderer.setSize(this.mount.clientWidth, this.mount.clientHeight); //ADD CAMERA
+
+      this.camera = new THREE.PerspectiveCamera(35, this.mount.clientWidth / this.mount.clientHeight, 0.1, 10000); // ADD LIGHTS
 
       this.scene.add(new THREE.AmbientLight(0x736F6E, 0.5));
       this.light = new THREE.DirectionalLight(0xFFFFFF, 1);
@@ -128,7 +142,7 @@ function (_Component) {
         context.scene.add(context.mesh);
         context.start();
       }, null, function (err) {
-        console.warn("Unable to laod file ".concat(_this2.props.url, ":").concat(err));
+        console.warn("Unable to load file ".concat(_this2.props.url, ":").concat(err));
         console.warn(err); // ADD CUBE
 
         _this2.mesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshLambertMaterial({
@@ -141,10 +155,12 @@ function (_Component) {
 
         _this2.start();
       });
+      window.addEventListener('resize', this.updateCanvasSize, false);
     }
   }, {
     key: "componentWillUnmount",
     value: function componentWillUnmount() {
+      window.removeEventListener('resize', this.updateCanvasSize, false);
       this.stop();
       this.mount.removeChild(this.renderer.domElement);
     }
@@ -155,13 +171,30 @@ function (_Component) {
 
       return _react.default.createElement("div", {
         style: {
+          position: 'relative',
           width: this.props.width,
-          height: this.props.height
-        },
+          // maxWidth: this.props.maxWidth,
+          paddingBottom: this.props.aspectRatio
+        }
+      }, _react.default.createElement("div", {
         ref: function ref(mount) {
           _this3.mount = mount;
+        },
+        style: {
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%'
         }
-      });
+      }, _react.default.createElement("canvas", {
+        style: {
+          width: '100%',
+          height: '100%'
+        },
+        width: '100%',
+        height: '100%'
+      })));
     }
   }]);
 
@@ -172,8 +205,9 @@ ModelViewer.defaultProps = {
   // url: './Torus_knot_1.stl', // binary - https://commons.wikimedia.org/wiki/File:Torus_knot_1.stl
   // url: 'n2.stl', // ascii - http://pub.ist.ac.at/~edels/Tubes/
   url: './test_model.stl',
-  width: '400px',
-  height: '400px',
+  width: '100%',
+  maxWidth: '42rem',
+  aspectRatio: '56.125%',
   color: '#FDD017',
   backgroundColor: '#EAEAEA',
   rotate: true,
