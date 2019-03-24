@@ -1,6 +1,6 @@
 {
   "name": "react-3d-model-viewer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A react component to view 3d models.",
   "author": "William Dutcher",
   "license": "MIT",

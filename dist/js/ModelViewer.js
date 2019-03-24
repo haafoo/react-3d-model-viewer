@@ -206,7 +206,7 @@ ModelViewer.defaultProps = {
   // url: 'n2.stl', // ascii - http://pub.ist.ac.at/~edels/Tubes/
   url: './test_model.stl',
   width: '100%',
-  maxWidth: '42rem',
+  // maxWidth: '42rem',
   aspectRatio: '56.125%',
   color: '#FDD017',
   backgroundColor: '#EAEAEA',
