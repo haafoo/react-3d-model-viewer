@@ -8,6 +8,12 @@ const webpack = require('webpack')
 
 module.exports = {
   entry: path.join(__dirname, 'examples/src/index.js'),
+  output: {
+    // path: path.resolve(__dirname, 'dist'),
+    path: path.join(__dirname, 'examples/dist'),
+    filename: 'index.js'
+    // publicPath: '/',
+  },
   module: {
     rules: [
       {
@@ -26,11 +32,6 @@ module.exports = {
   },
   resolve: {
     extensions: ['.js', '.jsx']
-  },
-  output: {
-    path: path.resolve(__dirname, 'dist'),
-    filename: 'index.js'
-    // publicPath: '/',
   },
   plugins: [
     htmlWebpackPlugin,
