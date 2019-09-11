@@ -1,20 +1,22 @@
 # react-3d-model-viewer [![](https://img.shields.io/npm/v/react-3d-model-viewer.svg)](https://www.npmjs.com/package/react-3d-model-viewer) 
-A React component to view 3D models using three.js. Demo located at https://haafoo.github.io/react-3d-model-viewer/
+A React component to view 3D models using three.js. [Demo](https://haafoo.github.io/react-3d-model-viewer/)
 
 ## Features
 * React component
 * Three.js WebGL renderer
 * Three.js STL Loader
 
-  Note - Dependent on my fork of Three.js but will migrate once STL Loader is modularized in Three's examples/jsm (which the fork currently add's).
+  Note - Remains dependent on my fork of Three.js which has a branch to expose some orbit controls
+  methods to provide a means of initial positioning (Three.js r104 incorporated a pull request to
+  modularize STL Loader in Three's examples/jsm (which this fork also previously added).
 
 ## Usage
 Install `react-3d-model-viewer` through npm
-```js
+```bash
 npm i react-3d-model-viewer
 ```
 Use `ModelViewer` component
-```js
+```bash
 import ModelViewer from 'react-3d-model-viewer'
 ```
 
