@@ -12,7 +12,7 @@ module.exports = {
     // path: path.resolve(__dirname, 'dist'),
     path: path.join(__dirname, 'examples/dist'),
     filename: 'index.js'
-    // publicPath: '/',
+    // publicPath: '/'
   },
   module: {
     rules: [
@@ -28,10 +28,20 @@ module.exports = {
           options: {}
         }]
       }
+      // {
+      //   test: require.resolve('jszip'),
+      //   use: [{
+      //     loader: 'expose-loader',   
+      //     options: 'JSZip'
+      //   }]
+      // }
     ]
   },
   resolve: {
     extensions: ['.js', '.jsx']
+    // alias: {
+    //   JSZip: "three/examples/js/libs/jszip.min.js"
+    // }
   },
   plugins: [
     htmlWebpackPlugin,

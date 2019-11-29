@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = void 0;
+exports["default"] = void 0;
 
 var _react = _interopRequireWildcard(require("react"));
 
@@ -13,7 +13,13 @@ var _OrbitControls = require("three/examples/jsm/controls/OrbitControls");
 
 var _STLLoader = require("three/examples/jsm/loaders/STLLoader");
 
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
+var _MFLoader = require("three/examples/jsm/loaders/3MFLoader");
+
+var _buffer = require("buffer");
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function _getRequireWildcardCache() { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { "default": obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
@@ -35,8 +41,8 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-// import testSTL from '../../examples/Torus_knot_1.stl'
-// import testSTL from '../../examples/n2.stl'
+require("expose-loader?JSZip!jszip");
+
 var ModelViewer =
 /*#__PURE__*/
 function (_Component) {
@@ -83,10 +89,11 @@ function (_Component) {
     _defineProperty(_assertThisInitialized(_this), "renderScene", function () {
       // this.updateCanvasSize()
       if (_this.props.rotate) {
-        _this.mesh.rotation.x += _this.props.rotationSpeeds[0];
-        _this.mesh.rotation.y += _this.props.rotationSpeeds[1];
-        _this.mesh.rotation.z += _this.props.rotationSpeeds[2];
-      }
+        _this.modelGroup.rotation.x += _this.props.rotationSpeeds[0];
+        _this.modelGroup.rotation.y += _this.props.rotationSpeeds[1];
+        _this.modelGroup.rotation.z += _this.props.rotationSpeeds[2];
+      } // this.box.update()
+
 
       _this.lightHolder.quaternion.copy(_this.camera.quaternion);
 
@@ -117,6 +124,7 @@ function (_Component) {
       this.light = new THREE.DirectionalLight(0xFFFFFF, 1);
       this.light.position.set(0, 10, 10);
       this.lightHolder = new THREE.Group();
+      this.lightHolder.name = 'lightHolder';
       this.lightHolder.add(this.light);
       this.scene.add(this.lightHolder); // ADD CONTROL
 
@@ -127,34 +135,77 @@ function (_Component) {
       this.mount.appendChild(this.renderer.domElement); // ADD GEOMETRY
 
       var context = this;
-      this.loader = new _STLLoader.STLLoader();
-      this.loader.load(this.props.url, function (geometry) {
-        geometry.computeFaceNormals();
-        geometry.computeVertexNormals();
-        geometry.center();
-        context.mesh = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial({
-          color: _this2.props.color
-        }));
-        var xDims = context.mesh.geometry.boundingBox.max.x - context.mesh.geometry.boundingBox.min.x;
-        var yDims = context.mesh.geometry.boundingBox.max.y - context.mesh.geometry.boundingBox.min.y;
-        var zDims = context.mesh.geometry.boundingBox.max.z - context.mesh.geometry.boundingBox.min.z;
-        context.camera.position.set(0, 0, Math.max(xDims * 3, yDims * 3, zDims * 3));
-        context.scene.add(context.mesh);
+      var re_ext = /(?:\.([^.]+))?$/i;
+      var fileType = re_ext.exec(this.props.url)[1];
+
+      if (fileType == 'stl') {
+        this.loader = new _STLLoader.STLLoader();
+        this.loader.load(this.props.url, function (geometry) {
+          geometry.computeFaceNormals();
+          geometry.computeVertexNormals();
+          geometry.center();
+          context.mesh = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial({
+            color: _this2.props.color
+          })); // context.axes = new THREE.AxesHelper(24)
+          // context.box = new THREE.BoxHelper(context.mesh, 0xff0000)
+
+          context.modelGroup = new THREE.Group();
+          context.modelGroup.name = 'modelGroup';
+          context.modelGroup.add(context.mesh);
+          var xDims = context.mesh.geometry.boundingBox.max.x - context.mesh.geometry.boundingBox.min.x;
+          var yDims = context.mesh.geometry.boundingBox.max.y - context.mesh.geometry.boundingBox.min.y;
+          var zDims = context.mesh.geometry.boundingBox.max.z - context.mesh.geometry.boundingBox.min.z;
+          context.camera.position.set(0, 0, Math.max(xDims * 3, yDims * 3, zDims * 3));
+          context.scene.add(context.modelGroup); // context.scene.add(context.box)
+          // context.scene.add(context.axes)
+
+          context.start();
+        }, null, function () {
+          return cubeModel(context);
+        });
+      } else if (re_ext.exec(this.props.url)[1] == '3mf') {
+        this.loader = new _MFLoader.ThreeMFLoader();
+        this.loader.load(this.props.url, function (object) {
+          object.children[0].children[0].geometry.center();
+          var mesh = object.children[0].children[0];
+          var xDims = mesh.geometry.boundingBox.max.x - mesh.geometry.boundingBox.min.x;
+          var yDims = mesh.geometry.boundingBox.max.y - mesh.geometry.boundingBox.min.y;
+          var zDims = mesh.geometry.boundingBox.max.z - mesh.geometry.boundingBox.min.z; //mesh.geometry.translate(0,0,zDims/-2)
+
+          mesh.material.color = new THREE.Color(_this2.props.color);
+          mesh.material.shininess = 0;
+          context.camera.position.set(0, 0, Math.max(xDims * 3, yDims * 3, zDims * 3));
+          context.modelGroup = object;
+          context.modelGroup.name = 'modelGroup'; // context.axes = new THREE.AxesHelper(24)
+          // context.box = new THREE.BoxHelper(mesh, 0xff0000)
+
+          context.scene.add(object); // context.scene.add(context.box)
+          // context.scene.add(context.axes)
+
+          context.start();
+        }, null, function () {
+          return cubeModel(context);
+        });
+      } else {
+        var err = new TypeError("Unknown 3d file type: ".concat(this.props.url));
+        console.error(err);
+        cubeModel(context);
+      }
+
+      function cubeModel(context) {
+        // ADD CUBE
+        var mesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshLambertMaterial({// context: this.props.color 
+        })); // context.box = new THREE.BoxHelper(mesh, 0xff0000)
+
+        context.modelGroup = new THREE.Group();
+        context.modelGroup.name = 'modelGroup';
+        context.modelGroup.add(mesh);
+        context.camera.position.set(0, 0, 3);
+        context.scene.add(context.modelGroup); // context.scene.add(context.box)
+
         context.start();
-      }, null, function (err) {
-        console.warn("Unable to load file ".concat(_this2.props.url, ":").concat(err));
-        console.warn(err); // ADD CUBE
+      }
 
-        _this2.mesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshLambertMaterial({
-          color: _this2.props.color
-        }));
-
-        _this2.camera.position.set(0, 0, 3);
-
-        _this2.scene.add(_this2.mesh);
-
-        _this2.start();
-      });
       window.addEventListener('resize', this.updateCanvasSize, false);
     }
   }, {
@@ -169,14 +220,14 @@ function (_Component) {
     value: function render() {
       var _this3 = this;
 
-      return _react.default.createElement("div", {
+      return _react["default"].createElement("div", {
         style: {
           position: 'relative',
           width: this.props.width,
           // maxWidth: this.props.maxWidth,
           paddingBottom: this.props.aspectRatio
         }
-      }, _react.default.createElement("div", {
+      }, _react["default"].createElement("div", {
         ref: function ref(mount) {
           _this3.mount = mount;
         },
@@ -187,7 +238,7 @@ function (_Component) {
           width: '100%',
           height: '100%'
         }
-      }, _react.default.createElement("canvas", {
+      }, _react["default"].createElement("canvas", {
         style: {
           width: '100%',
           height: '100%'
@@ -200,12 +251,18 @@ function (_Component) {
 
   return ModelViewer;
 }(_react.Component);
+/*
+ *  When running project with dev server put the model files in /dist (as opposed to /examples/dist)
+ */
+
 
 ModelViewer.defaultProps = {
   // url: './Torus_knot_1.stl', // binary - https://commons.wikimedia.org/wiki/File:Torus_knot_1.stl
-  // url: 'n2.stl', // ascii - http://pub.ist.ac.at/~edels/Tubes/
-  url: './test_model.stl',
-  width: '100%',
+  // url: './n2.stl', // ascii - http://pub.ist.ac.at/~edels/Tubes/
+  // url: './test_model.stl', // torus_knot
+  url: './test_model.3mf',
+  // torus
+  // width: '100%',
   // maxWidth: '42rem',
   aspectRatio: '56.125%',
   color: '#FDD017',
@@ -215,4 +272,4 @@ ModelViewer.defaultProps = {
   initControlPosition: [0, 0, 1.0]
 };
 var _default = ModelViewer;
-exports.default = _default;
+exports["default"] = _default;
