@@ -1,5 +1,5 @@
 # react-3d-model-viewer [![](https://img.shields.io/npm/v/react-3d-model-viewer.svg)](https://www.npmjs.com/package/react-3d-model-viewer) 
-A React component to view 3D models using three.js. [Demo](https://haafoo.github.io/react-3d-model-viewer/)
+A React component to view 3D models in either stl or 3mf formats using three.js. [Demo](https://haafoo.github.io/react-3d-model-viewer/)
 
 ## Features
 * React component
