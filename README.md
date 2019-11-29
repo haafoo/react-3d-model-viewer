@@ -5,6 +5,7 @@ A React component to view 3D models using three.js. [Demo](https://haafoo.github
 * React component
 * Three.js WebGL renderer
 * Three.js STL Loader
+* Three.js 3MF Loader
 
   Note - Remains dependent on my fork of Three.js which has a branch to expose some orbit controls
   methods to provide a means of initial positioning (Three.js r104 incorporated a pull request to
