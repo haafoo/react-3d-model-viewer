@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "expose-loader": "^0.7.5",
-    "jszip": "2.6.0",
+    "jszip": "2.7.0",
     "three": "git+https://github.com/haafoo/three.js.git#feature/orbit-controls-position"
   },
   "devDependencies": {
